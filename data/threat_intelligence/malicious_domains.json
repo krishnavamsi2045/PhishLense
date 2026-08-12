@@ -1,5 +1,6 @@
 [
   "evil-example.test",
   "phishing-example.test",
-  "fake-login.test"
+  "fake-login.test",
+  "new-phishing.test"
 ]
