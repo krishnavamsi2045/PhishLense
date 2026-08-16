@@ -1,0 +1,17 @@
+[
+  {
+    "phish_id": "TEST001",
+    "url": "http://test-phishing-one.test/login",
+    "online": "yes"
+  },
+  {
+    "phish_id": "TEST002",
+    "url": "http://test-phishing-two.test/verify",
+    "online": "yes"
+  },
+  {
+    "phish_id": "TEST003",
+    "url": "http://test-phishing-three.test/account",
+    "online": "yes"
+  }
+]

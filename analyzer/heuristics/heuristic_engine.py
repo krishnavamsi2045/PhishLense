@@ -86,29 +86,29 @@ def calculate_risk_score(
         score += 5
         reasons.append("Domain contains multiple hyphens")
 
-    # -----------------------------
+        # -----------------------------
     # THREAT INTELLIGENCE
     # -----------------------------
 
     if threat_intelligence:
+
         if threat_intelligence.get("url_match"):
             score += 50
             reasons.append(
                 "Exact URL found in threat-intelligence database"
             )
 
-        elif threat_intelligence.get("domain_match"):
-            score += 40
+        if threat_intelligence.get("domain_match"):
+            score += 20
             reasons.append(
                 "Domain found in threat-intelligence database"
             )
 
-        elif threat_intelligence.get("ip_match"):
-            score += 40
+        if threat_intelligence.get("ip_match"):
+            score += 20
             reasons.append(
                 "IP address found in threat-intelligence database"
             )
-
     # Keep score between 0 and 100
     score = min(score, 100)
 

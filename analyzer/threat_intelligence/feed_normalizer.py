@@ -1,21 +1,60 @@
 from datetime import datetime, timezone
-from urllib.parse import urlparse
+from urllib.parse import urlsplit, urlunsplit
 
 
-def normalize_url(url: str) -> str:
-    """Normalize a URL for consistent threat-intelligence matching."""
+def normalize_url(value: str) -> str:
+    """
+    Normalize a URL for threat-intelligence storage.
 
-    return url.strip().rstrip("/").lower()
+    Normalization:
+    - Removes surrounding whitespace
+    - Converts scheme to lowercase
+    - Converts hostname to lowercase
+    - Preserves port, path and query
+    - Removes URL fragments
+    - Removes a trailing slash from the path when appropriate
+    - Returns a plain URL string
+    """
+
+    value = value.strip()
+
+    if not value:
+        return ""
+
+    parsed = urlsplit(value)
+
+    scheme = parsed.scheme.lower()
+    netloc = parsed.netloc.lower()
+    path = parsed.path
+    query = parsed.query
+
+    # Remove trailing slash except when the path is simply "/"
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+
+    return urlunsplit(
+        (
+            scheme,
+            netloc,
+            path,
+            query,
+            "",
+        )
+    )
 
 
 def normalize_domain(domain: str) -> str:
-    """Normalize a domain name."""
+    """
+    Normalize a domain name.
+    """
 
     return domain.strip().lower().rstrip(".")
 
 
 def normalize_ip(ip: str) -> str:
-    """Normalize an IP address."""
+    """
+    Normalize an IP address.
+    """
 
     return ip.strip()
 
@@ -31,7 +70,7 @@ def create_threat_record(
     PhishLense's standard internal format.
     """
 
-    indicator_type = indicator_type.lower()
+    indicator_type = indicator_type.strip().lower()
 
     if indicator_type == "url":
         normalized_indicator = normalize_url(indicator)
