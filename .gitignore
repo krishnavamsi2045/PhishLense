@@ -9,3 +9,9 @@ data/raw/*
 data/processed/*
 .pytest_cache/
 .vscode/
+*.zip
+node_modules/
+dist/
+build/
+.DS_Store
+

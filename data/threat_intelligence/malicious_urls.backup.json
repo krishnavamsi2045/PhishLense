@@ -6,4 +6,4 @@
   "http://test-phishing-one.test/login",
   "http://test-phishing-two.test/verify",
   "http://test-phishing-three.test/account"
-]
+]python -c "from pathlib import Path; print(Path('analyzer/url_analyzer.py').read_text(encoding='utf-8')[:4000])"

@@ -1,1 +1,87 @@
-#root{min-height:100vh}
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root {
+  --phish-cyan: #00e5ff;
+  --phish-cyan-glow: rgba(0, 229, 255, 0.4);
+  --phish-cyan-dim: rgba(0, 229, 255, 0.12);
+  --phish-blue: #0077b6;
+  --phish-purple: #7c3aed;
+  --phish-purple-glow: rgba(124, 58, 237, 0.4);
+  --phish-red: #ff3b5c;
+  --phish-red-glow: rgba(255, 59, 92, 0.4);
+  --phish-green: #00e676;
+  --phish-green-glow: rgba(0, 230, 118, 0.4);
+  --phish-warning: #ffb020;
+  --phish-warning-glow: rgba(255, 176, 32, 0.4);
+  --phish-bg: #02040a;
+  --phish-bg-alt: #050b18;
+  --phish-panel: rgba(8, 15, 30, 0.72);
+  --phish-panel-solid: #091224;
+  --phish-panel-hover: rgba(14, 25, 48, 0.85);
+  --phish-border: rgba(0, 229, 255, 0.15);
+  --phish-border-bright: rgba(0, 229, 255, 0.4);
+  --phish-text: #e2f1f8;
+  --phish-text-muted: #7e9bb6;
+  --phish-text-dim: #4d6680;
+  
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", var(--font-sans);
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, Menlo, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: var(--phish-bg);
+  color: var(--phish-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Custom Cyber Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(2, 4, 10, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.5);
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.3);
+  color: #ffffff;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
