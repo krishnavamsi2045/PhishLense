@@ -7,8 +7,9 @@ import ScanModal from "./ScanModal";
 import BootSequence from "./BootSequence";
 import Terminal from "./Terminal";
 import Environment from "../scenes/Environment";
+import CyberBackground from "./CyberBackground";
 
-import DashboardView from "../pages/DashboardView";
+import DashboardView from "../Pages/DashboardView";
 import ScanView from "../pages/ScanView";
 import ThreatIntelView from "../pages/ThreatIntelView";
 import LiveFeedView from "../pages/LiveFeedView";
@@ -115,6 +116,9 @@ export default function AppShell() {
       <AnimatePresence>
         {!bootDone && <BootSequence onComplete={() => setBootDone(true)} />}
       </AnimatePresence>
+
+      {/* Black and Red Plain Theme Background */}
+      <CyberBackground />
 
       {/* Persistent Layered 3D Environment Canvas (0 Remounts Across All Views) */}
       <Environment recentScans={recentScans} />

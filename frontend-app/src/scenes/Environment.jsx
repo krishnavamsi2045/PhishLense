@@ -46,7 +46,7 @@ function CyberGridFloor({ threatRatio = 0, gridDensity = 1.0 }) {
     }
   });
 
-  const gridColor = threatRatio > 0.35 ? "#FF3B5C" : "#00E5FF";
+  const gridColor = "#FF2A4B";
 
   return (
     <group position={[0, -3.8, -3]} rotation={[-Math.PI / 2.3, 0, 0]}>
@@ -56,7 +56,7 @@ function CyberGridFloor({ threatRatio = 0, gridDensity = 1.0 }) {
           color={gridColor}
           wireframe
           transparent
-          opacity={(0.04 + threatRatio * 0.04) * gridDensity}
+          opacity={(0.03 + threatRatio * 0.03) * gridDensity}
         />
       </mesh>
     </group>
@@ -95,9 +95,9 @@ function MatrixStreamPlanes({ count = 24 }) {
         <mesh key={idx} position={[s.x, s.y, s.z]}>
           <planeGeometry args={[0.08, s.height]} />
           <meshBasicMaterial
-            color="#00E5FF"
+            color="#FF2A4B"
             transparent
-            opacity={0.12}
+            opacity={0.08}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
@@ -110,12 +110,12 @@ function MatrixStreamPlanes({ count = 24 }) {
  * Ambient Signal Field Particles (Dynamic density and hue based on threat ratio)
  */
 function AmbientSignalField({ threatRatio = 0, tier = "Standard" }) {
-  const count = tier === "Ultra" ? 180 : tier === "Mobile" ? 50 : 120;
+  const count = tier === "Ultra" ? 140 : tier === "Mobile" ? 40 : 90;
 
   const color = useMemo(() => {
-    if (threatRatio > 0.4) return "#FF3B5C";
-    if (threatRatio > 0.15) return "#FFB020";
-    return "#00E5FF";
+    if (threatRatio > 0.4) return "#FF2A4B";
+    if (threatRatio > 0.15) return "#DC2626";
+    return "#991B1B";
   }, [threatRatio]);
 
   const speed = useMemo(() => 0.15 + threatRatio * 0.25, [threatRatio]);
@@ -175,19 +175,16 @@ export default function Environment({ recentScans = [] }) {
           alpha: true,
         }}
       >
-        <color attach="background" args={["#02040A"]} />
-        <fog attach="fog" args={["#02040A", 5, 22]} />
-
-        <ambientLight intensity={currentDirective?.lightIntensity * 0.5 || 0.5} />
-        <pointLight position={[6, 5, 4]} intensity={2.0} color="#00E5FF" />
-        <pointLight position={[-6, -4, 3]} intensity={1.6} color="#7C3AED" />
+        <ambientLight intensity={currentDirective?.lightIntensity * 0.4 || 0.4} />
+        <pointLight position={[6, 5, 4]} intensity={1.8} color="#FF2A4B" />
+        <pointLight position={[-6, -4, 3]} intensity={1.2} color="#991B1B" />
 
         <CameraDirector />
         <CyberGridFloor
           threatRatio={threatRatio}
           gridDensity={currentDirective?.gridDensity || 1.0}
         />
-        {tier !== "Mobile" && <MatrixStreamPlanes count={tier === "Ultra" ? 36 : 20} />}
+        {tier !== "Mobile" && <MatrixStreamPlanes count={tier === "Ultra" ? 28 : 16} />}
         <AmbientSignalField threatRatio={threatRatio} tier={tier} />
       </Canvas>
     </div>

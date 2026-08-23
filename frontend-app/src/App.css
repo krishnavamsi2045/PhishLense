@@ -5,7 +5,7 @@
 .spa-app-root {
   min-height: 100vh;
   width: 100%;
-  background-color: var(--phish-bg);
+  background: transparent;
   position: relative;
   overflow-x: hidden;
 }
@@ -47,8 +47,6 @@
   left: 0;
   bottom: 0;
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--phish-border);
   display: flex;
   flex-direction: column;
@@ -294,8 +292,6 @@
 .topbar-shell {
   height: 72px;
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--phish-border);
   display: flex;
   align-items: center;
@@ -617,8 +613,6 @@
 
 .stat-card-shell {
   background: var(--phish-panel);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--phish-border);
   border-radius: 14px;
   padding: 20px 22px;
@@ -729,8 +723,6 @@
 /* ═══════════ THREAT COMMAND CENTER & 3D GLOBE ═══════════ */
 .threat-command-center {
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--phish-border);
   border-radius: 16px;
   padding: 20px 24px;
@@ -1083,8 +1075,6 @@
 
 .analytics-card-shell {
   background: var(--phish-panel);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--phish-border);
   border-radius: 14px;
   padding: 20px 24px;
@@ -1237,8 +1227,6 @@
 /* ═══════════ AI ENGINE STATUS ═══════════ */
 .ai-engine-shell {
   background: var(--phish-panel);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--phish-border);
   border-radius: 14px;
   padding: 20px 24px;
@@ -1392,8 +1380,6 @@
 /* ═══════════ TABLES ═══════════ */
 .table-card-shell {
   background: var(--phish-panel);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--phish-border);
   border-radius: 14px;
   padding: 20px 24px;
@@ -1680,8 +1666,6 @@
 
 .scan-input-card {
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--phish-border);
   border-radius: 16px;
   padding: 24px;
@@ -1850,8 +1834,6 @@
 
 .shield-3d-panel {
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--phish-border);
   border-radius: 16px;
   padding: 16px;
@@ -1883,8 +1865,6 @@
 
 .verdict-primary-panel {
   background: var(--phish-panel);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--phish-border);
   border-radius: 16px;
   padding: 24px;
@@ -3062,8 +3042,6 @@
   position: fixed;
   inset: 0;
   background: rgba(2, 4, 10, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   z-index: 200;
   display: flex;
   align-items: flex-start;

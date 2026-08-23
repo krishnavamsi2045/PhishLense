@@ -13,16 +13,16 @@
   --phish-green-glow: rgba(0, 230, 118, 0.4);
   --phish-warning: #ffb020;
   --phish-warning-glow: rgba(255, 176, 32, 0.4);
-  --phish-bg: #02040a;
-  --phish-bg-alt: #050b18;
-  --phish-panel: rgba(8, 15, 30, 0.72);
-  --phish-panel-solid: #091224;
-  --phish-panel-hover: rgba(14, 25, 48, 0.85);
-  --phish-border: rgba(0, 229, 255, 0.15);
-  --phish-border-bright: rgba(0, 229, 255, 0.4);
+  --phish-bg: transparent;
+  --phish-bg-alt: rgba(5, 11, 24, 0.4);
+  --phish-panel: rgba(6, 14, 28, 0.45);
+  --phish-panel-solid: rgba(8, 18, 36, 0.65);
+  --phish-panel-hover: rgba(12, 24, 48, 0.55);
+  --phish-border: rgba(0, 229, 255, 0.25);
+  --phish-border-bright: rgba(0, 229, 255, 0.55);
   --phish-text: #e2f1f8;
-  --phish-text-muted: #7e9bb6;
-  --phish-text-dim: #4d6680;
+  --phish-text-muted: #8ba5be;
+  --phish-text-dim: #5c7590;
   
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: "Space Grotesk", var(--font-sans);
@@ -35,6 +35,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html,
