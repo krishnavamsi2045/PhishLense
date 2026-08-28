@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   FiSearch,
   FiBell,
   FiShield,
-  FiActivity,
-  FiTerminal,
-  FiX,
   FiCheckCircle,
-  FiAlertTriangle,
   FiMenu,
   FiLogOut,
   FiUser,
-  FiCpu,
-  FiZap,
+  FiSliders,
 } from "react-icons/fi";
 
 export default function Topbar({
   activeView,
   setActiveView,
   onOpenCommandPalette,
-  onOpenTerminal,
   stats,
   notifications = [],
   onClearNotifications,
@@ -29,25 +23,15 @@ export default function Topbar({
   onLogout,
   onOpenAuth,
 }) {
-  const [currentTime, setCurrentTime] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const utcString = now.toUTCString().split(" ")[4] + " UTC";
-      setCurrentTime(utcString);
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const isAdmin = user?.role === "ADMIN";
   const totalThreats = (stats?.phishing || 0) + (stats?.suspicious || 0);
   const threatLevel =
     stats?.phishing > 0 ? "ELEVATED" : totalThreats > 0 ? "MONITORING" : "SECURE";
+
+  const displayName = user?.full_name || "PhishLense Analyst";
+  const displayEmail = user?.email || "phishlense@analyst.com";
 
   return (
     <header className="topbar-shell">
@@ -64,7 +48,7 @@ export default function Topbar({
         <div className="command-search-bar" onClick={onOpenCommandPalette}>
           <FiSearch className="search-icon" />
           <span className="search-placeholder">
-            Search threats, domains, IPs...
+            Search threats, domains, IoCs...
           </span>
           <kbd className="cmd-badge">
             <span>Ctrl</span>K
@@ -78,33 +62,8 @@ export default function Topbar({
         </div>
       </div>
 
-      {/* Right Area: Time, Fast Scan, Notifications, Profile */}
+      {/* Right Area: Notifications & Clean User Profile */}
       <div className="topbar-right">
-        {/* UTC Clock */}
-        <div className="utc-clock-badge">
-          <FiActivity className="clock-icon" />
-          <span>{currentTime || "12:00:00 UTC"}</span>
-        </div>
-
-        {/* Scan URL Primary Action */}
-        <button
-          className="topbar-scan-btn glow-button"
-          onClick={() => setActiveView("scan")}
-        >
-          <FiShield className="btn-icon" />
-          <span>Scan URL</span>
-        </button>
-
-        {/* Interactive Terminal Quick Launch */}
-        <button
-          className="topbar-terminal-btn"
-          onClick={onOpenTerminal}
-          title="Open Threat Terminal (`)"
-        >
-          <FiTerminal />
-          <span>Terminal</span>
-        </button>
-
         {/* Notifications Dropdown */}
         <div className="notif-wrapper">
           <button
@@ -121,7 +80,7 @@ export default function Topbar({
           {notifOpen && (
             <div className="notif-dropdown-card glass-panel">
               <div className="notif-header">
-                <span className="notif-title">SOC Incident Alerts</span>
+                <span className="notif-title">Security Incident Alerts</span>
                 {notifications.length > 0 && (
                   <button
                     className="notif-clear-btn"
@@ -157,17 +116,15 @@ export default function Topbar({
         <div className="user-profile-menu-wrap">
           {user ? (
             <button
-              className={`user-identity-pill ${isAdmin ? "admin" : "analyst"}`}
+              className="user-identity-pill"
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
             >
               <div className="avatar-chip">
-                {user.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+                {displayName.charAt(0).toUpperCase()}
               </div>
               <div className="identity-text">
-                <strong className="user-title">{user.full_name}</strong>
-                <span className="user-clearance">
-                  {isAdmin ? "COMMANDER (ADMIN)" : "ANALYST (USER)"}
-                </span>
+                <span className="user-name-title">{displayName}</span>
+                <span className="user-email-subtitle">{displayEmail}</span>
               </div>
             </button>
           ) : (
@@ -180,11 +137,14 @@ export default function Topbar({
           {profileDropdownOpen && user && (
             <div className="profile-dropdown glass-panel">
               <div className="profile-drop-header">
-                <strong>{user.full_name}</strong>
-                <span>{user.email}</span>
-                <span className={`role-tag ${isAdmin ? "admin" : "analyst"}`}>
-                  {user.role} Clearances
-                </span>
+                <div className="avatar-large">
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="drop-user-details">
+                  <strong className="drop-user-name">{displayName}</strong>
+                  <span className="drop-user-email">{displayEmail}</span>
+                  <span className="role-tag analyst">Authenticated Analyst</span>
+                </div>
               </div>
 
               <div className="profile-drop-actions">
@@ -195,7 +155,7 @@ export default function Topbar({
                     setProfileDropdownOpen(false);
                   }}
                 >
-                  <FiUser />
+                  <FiSliders />
                   <span>Profile & Settings</span>
                 </button>
                 <button
@@ -206,7 +166,7 @@ export default function Topbar({
                   }}
                 >
                   <FiLogOut />
-                  <span>End Session (Logout)</span>
+                  <span>Sign Out</span>
                 </button>
               </div>
             </div>
