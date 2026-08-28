@@ -8,7 +8,7 @@ import random
 from database.models import Scan
 
 INITIAL_SEEDS = [
-    # Safe / Clean Infrastructure
+    # Safe / Clean Infrastructure (55 URLs)
     ("https://www.google.com/search?q=cybersecurity+defense", "SAFE", 0),
     ("https://en.wikipedia.org/wiki/Phishing", "SAFE", 0),
     ("https://github.com/torvalds/linux", "SAFE", 0),
@@ -65,7 +65,7 @@ INITIAL_SEEDS = [
     ("https://archive.org/web/", "SAFE", 0),
     ("https://vimeo.com/categories", "SAFE", 0),
 
-    # Suspicious Anomaly Flags
+    # Suspicious Anomaly Flags (50 URLs)
     ("http://bit.ly/3xY7kL9_secure_redirect", "SUSPICIOUS", 42),
     ("http://tinyurl.com/account-verify-9912", "SUSPICIOUS", 55),
     ("http://t.co/kX928aN1_auth", "SUSPICIOUS", 38),
@@ -117,7 +117,7 @@ INITIAL_SEEDS = [
     ("http://verification-desk-alert.info/action", "SUSPICIOUS", 52),
     ("http://client-access-checkpoint.mobi/login", "SUSPICIOUS", 45),
 
-    # High Confidence Phishing Threats
+    # High Confidence Phishing Threats (55 URLs)
     ("http://paypal-verification-secure-banking.com/login/webscr.php", "PHISHING", 96),
     ("http://paypal-update-account-center.xyz/auth/login.php?ref=mail", "PHISHING", 98),
     ("http://paypal-security-alert-resolve.top/verification.html", "PHISHING", 92),
@@ -175,12 +175,16 @@ INITIAL_SEEDS = [
     ("http://secure-wellsfargo-customer-id.top/login.php", "PHISHING", 96),
 ]
 
-def auto_seed_scans_if_needed(db_session):
-    """Automatically seeds initial historical scans if table is empty."""
+def auto_seed_scans_if_needed(db_session, force=False):
+    """Automatically seeds initial historical scans if table is missing phishing/suspicious categories."""
     try:
-        count = db_session.query(Scan).count()
-        if count == 0:
-            print("[INFO] Seeding initial 160+ historical scans into database...", flush=True)
+        phish_cnt = db_session.query(Scan).filter(Scan.verdict.in_(["PHISHING", "MALICIOUS", "HIGH_RISK"])).count()
+        susp_cnt = db_session.query(Scan).filter(Scan.verdict.in_(["SUSPICIOUS", "MEDIUM_RISK"])).count()
+        total_cnt = db_session.query(Scan).count()
+
+        if force or phish_cnt == 0 or susp_cnt == 0 or total_cnt < 100:
+            print("[INFO] Re-seeding balanced multi-category historical scans into database...", flush=True)
+            db_session.query(Scan).delete()
             now = datetime.now(timezone.utc)
             random.seed(42)
             
@@ -196,7 +200,10 @@ def auto_seed_scans_if_needed(db_session):
                 db_session.add(scan)
             
             db_session.commit()
-            print(f"[INFO] Successfully seeded {len(INITIAL_SEEDS)} scans!", flush=True)
+            print(f"[INFO] Successfully seeded {len(INITIAL_SEEDS)} balanced scans!", flush=True)
+            return len(INITIAL_SEEDS)
+        return total_cnt
     except Exception as e:
         print(f"[WARN] Failed to auto-seed scans: {e}", flush=True)
         db_session.rollback()
+        return 0

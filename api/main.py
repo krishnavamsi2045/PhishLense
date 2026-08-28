@@ -194,6 +194,28 @@ def clear_history():
 
 
 # ------------------------------------
+# Re-Seed Database Endpoint
+# ------------------------------------
+@app.get("/seed")
+def seed_database():
+    db = SessionLocal()
+    try:
+        seeded_count = auto_seed_scans_if_needed(db, force=True)
+        return {
+            "status": "success",
+            "message": f"Successfully seeded {seeded_count} multi-category scans",
+            "stats": {
+                "total_scans": db.query(Scan).count(),
+                "phishing": db.query(Scan).filter(Scan.verdict == "PHISHING").count(),
+                "suspicious": db.query(Scan).filter(Scan.verdict == "SUSPICIOUS").count(),
+                "safe": db.query(Scan).filter(Scan.verdict == "SAFE").count(),
+            }
+        }
+    finally:
+        db.close()
+
+
+# ------------------------------------
 # Statistics
 # ------------------------------------
 @app.get("/stats")
