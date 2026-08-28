@@ -12,6 +12,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { registerApi } from "../services/api";
+import ScrollSequenceBackground from "../components/ScrollSequenceBackground";
 
 export default function RegisterView() {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export default function RegisterView() {
 
   return (
     <div className="auth-fullscreen-container">
+      <ScrollSequenceBackground />
       <motion.div
         className="auth-clean-card glass-panel"
         initial={{ opacity: 0, scale: 0.95, y: 15 }}

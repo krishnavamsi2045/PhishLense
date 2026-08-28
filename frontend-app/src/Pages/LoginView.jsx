@@ -9,6 +9,7 @@ import {
   FiAlertTriangle,
 } from "react-icons/fi";
 import { loginApi } from "../services/api";
+import ScrollSequenceBackground from "../components/ScrollSequenceBackground";
 
 export default function LoginView({ onLoginSuccess }) {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ export default function LoginView({ onLoginSuccess }) {
 
   return (
     <div className="auth-fullscreen-container">
+      <ScrollSequenceBackground />
       <motion.div
         className="auth-clean-card glass-panel"
         initial={{ opacity: 0, scale: 0.96, y: 12 }}
