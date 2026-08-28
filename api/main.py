@@ -10,12 +10,16 @@ from pydantic import BaseModel
 from backend.analyzer.url_analyzer import analyze_url
 from database.db import engine, SessionLocal, Base
 from database.models import Scan
+from database.seed_data import auto_seed_scans_if_needed
 
 
 # ------------------------------------
-# Create Database Tables
+# Create Database Tables & Auto Seed
 # ------------------------------------
 Base.metadata.create_all(bind=engine)
+_init_db = SessionLocal()
+auto_seed_scans_if_needed(_init_db)
+_init_db.close()
 
 
 # ------------------------------------
@@ -196,6 +200,7 @@ def clear_history():
 def stats():
     db = SessionLocal()
     try:
+        auto_seed_scans_if_needed(db)
         total = db.query(Scan).count()
 
         phishing = (
