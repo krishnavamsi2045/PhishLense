@@ -4,11 +4,11 @@ services:
   # ----------------------------------------------------
   - type: web
     name: phishlense-api
-    env: python
+    runtime: python
     region: oregon
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn api.main:app --host 0.0.0.0 --port $PORT"
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
@@ -18,11 +18,10 @@ services:
   # ----------------------------------------------------
   - type: web
     name: phishlense-frontend
-    env: static
+    runtime: static
     region: oregon
-    plan: free
     rootDir: frontend-app
-    buildCommand: "npm install && npm run build"
+    buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
       - type: rewrite
@@ -30,7 +29,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: phishlense-api
-          property: host
+        value: https://phishlense.onrender.com
