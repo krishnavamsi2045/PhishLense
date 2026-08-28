@@ -11,33 +11,28 @@ const getFramePath = (index) => {
 };
 
 export default function ScrollSequenceBackground({
-  overlayOpacity = 0.55,
-  scanlines = true,
-  interactive = true,
+  overlayOpacity = 0.40, // Balanced transparency so animation is crisp & clearly visible
+  opacity = 1.0,
 }) {
   const canvasRef = useRef(null);
-  const imagesRef = useRef([]);
   const loadedMapRef = useRef(new Map());
   const currentFrameRef = useRef(1);
   const targetFrameRef = useRef(1);
   const animFrameIdRef = useRef(null);
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef(null);
-  const [loadProgress, setLoadProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
 
-  // Draw a specific frame onto the canvas preserving aspect ratio ("cover" mode)
+  // Draw frame with 100% crisp sharpness without blur
   const drawFrame = useCallback((frameIndex) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // Find the closest loaded frame if current frame isn't loaded yet
     let img = loadedMapRef.current.get(frameIndex);
     if (!img) {
-      // Search nearest available frame
-      for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
+      for (let offset = 1; offset < 20; offset++) {
         if (loadedMapRef.current.has(frameIndex - offset)) {
           img = loadedMapRef.current.get(frameIndex - offset);
           break;
@@ -49,10 +44,15 @@ export default function ScrollSequenceBackground({
       }
     }
 
-    if (!img || !img.complete || img.naturalWidth === 0) return;
-
     const cw = canvas.width;
     const ch = canvas.height;
+
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      ctx.fillStyle = "#030712";
+      ctx.fillRect(0, 0, cw, ch);
+      return;
+    }
+
     const iw = img.naturalWidth || img.width;
     const ih = img.naturalHeight || img.height;
 
@@ -66,28 +66,25 @@ export default function ScrollSequenceBackground({
     const nx = (cw - nw) / 2;
     const ny = (ch - nh) / 2;
 
-    // Fast image rendering without blur
+    // High quality crisp image rendering
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+
     ctx.drawImage(img, nx, ny, nw, nh);
   }, []);
 
-  // Preload frames progressively
+  // Preload all 240 frames
   useEffect(() => {
     let isCancelled = false;
-    let loadedCount = 0;
 
     const loadSingleImage = (index) => {
       return new Promise((resolve) => {
+        if (loadedMapRef.current.has(index)) return resolve();
         const img = new Image();
         img.src = getFramePath(index);
         img.onload = () => {
           if (isCancelled) return resolve();
           loadedMapRef.current.set(index, img);
-          loadedCount++;
-          if (loadedCount % 12 === 0 || loadedCount === TOTAL_FRAMES) {
-            setLoadProgress(Math.round((loadedCount / TOTAL_FRAMES) * 100));
-          }
           if (index === 1 && !isReady) {
             setIsReady(true);
             drawFrame(1);
@@ -98,27 +95,26 @@ export default function ScrollSequenceBackground({
       });
     };
 
-    // Priority 1: Key interval frames (1, 10, 20... and first 10 frames)
+    // Priority 1: Key interval frames for instant scrubbing
     const priorityIndices = [];
-    for (let i = 1; i <= 15; i++) priorityIndices.push(i);
-    for (let i = 16; i <= TOTAL_FRAMES; i += 6) priorityIndices.push(i);
+    for (let i = 1; i <= TOTAL_FRAMES; i += 3) priorityIndices.push(i);
 
     const remainingIndices = [];
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       if (!priorityIndices.includes(i)) remainingIndices.push(i);
     }
 
-    // Load initial frames sequentially/batch
     const loadAll = async () => {
       for (const idx of priorityIndices) {
         if (isCancelled) return;
         await loadSingleImage(idx);
       }
       setIsReady(true);
-      // Load remaining frames
-      for (const idx of remainingIndices) {
+
+      for (let i = 0; i < remainingIndices.length; i += 8) {
         if (isCancelled) return;
-        loadSingleImage(idx);
+        const chunk = remainingIndices.slice(i, i + 8);
+        await Promise.all(chunk.map(loadSingleImage));
       }
     };
 
@@ -129,7 +125,7 @@ export default function ScrollSequenceBackground({
     };
   }, [drawFrame, isReady]);
 
-  // Handle Canvas Resize with Retina / HiDPI DPR support
+  // Handle Canvas Resize with pixel-perfect Retina / HiDPI DPR
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
@@ -138,8 +134,8 @@ export default function ScrollSequenceBackground({
       const width = window.innerWidth;
       const height = window.innerHeight;
 
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
@@ -151,18 +147,16 @@ export default function ScrollSequenceBackground({
     return () => window.removeEventListener("resize", handleResize);
   }, [drawFrame]);
 
-  // Scroll event listener: Map page scroll to frame 1 -> 240
+  // Map Page Scroll to Frame 1 -> 240
   useEffect(() => {
     const handleScroll = () => {
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
       const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+      const progress = Math.min(Math.max(scrollTop / docHeight, 0), 1);
 
-      let progress = 0;
-      if (docHeight > 0) {
-        progress = Math.min(Math.max(scrollTop / docHeight, 0), 1);
-      }
-
-      // Calculate target frame (1 to TOTAL_FRAMES)
       const target = Math.max(1, Math.min(TOTAL_FRAMES, Math.floor(progress * (TOTAL_FRAMES - 1)) + 1));
       targetFrameRef.current = target;
 
@@ -174,7 +168,7 @@ export default function ScrollSequenceBackground({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial evaluation
+    handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -182,23 +176,31 @@ export default function ScrollSequenceBackground({
     };
   }, []);
 
-  // Smooth frame interpolation loop (Lerp)
+  // Butter Smooth Lerp Interpolation
   useEffect(() => {
     let lastDrawnFrame = -1;
+    let idleCounter = 0;
 
     const renderLoop = () => {
       const current = currentFrameRef.current;
-      const target = targetFrameRef.current;
+      let target = targetFrameRef.current;
 
-      // Smooth lerp easing factor
+      // Subtle ambient motion when idle
+      if (!isScrollingRef.current) {
+        idleCounter += 0.03;
+        const ambientOffset = Math.sin(idleCounter * 0.4) * 2;
+        target = Math.max(1, Math.min(TOTAL_FRAMES, target + ambientOffset));
+      }
+
+      // Butter smooth lerp easing factor (0.12)
       const diff = target - current;
-      if (Math.abs(diff) > 0.05) {
+      if (Math.abs(diff) > 0.02) {
         currentFrameRef.current = current + diff * 0.12;
       } else {
         currentFrameRef.current = target;
       }
 
-      const frameToDraw = Math.round(currentFrameRef.current);
+      const frameToDraw = Math.max(1, Math.min(TOTAL_FRAMES, Math.round(currentFrameRef.current)));
       if (frameToDraw !== lastDrawnFrame) {
         drawFrame(frameToDraw);
         lastDrawnFrame = frameToDraw;
@@ -218,18 +220,18 @@ export default function ScrollSequenceBackground({
 
   return (
     <div
-      className="scroll-sequence-container"
+      className="scroll-sequence-clean-container"
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
-        backgroundColor: "#02040a",
+        backgroundColor: "#030712",
       }}
       aria-hidden="true"
     >
-      {/* Crisp Canvas Frame Renderer without blur - 100% clarity */}
+      {/* 100% Crisp, High-Clarity Canvas with ZERO blur */}
       <canvas
         ref={canvasRef}
         style={{
@@ -241,6 +243,17 @@ export default function ScrollSequenceBackground({
           display: "block",
           filter: "none",
           transform: "translate3d(0, 0, 0)",
+          opacity: opacity,
+        }}
+      />
+
+      {/* Gentle Cyber Tint - Keeps the scrolling animation clearly visible while giving cards clean contrast */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: `rgba(3, 7, 18, ${overlayOpacity})`,
+          pointerEvents: "none",
         }}
       />
     </div>

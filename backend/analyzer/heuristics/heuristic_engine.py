@@ -262,6 +262,21 @@ def calculate_risk_score(
         )
 
     # --------------------------------
+    # Suspicious TLD
+    # --------------------------------
+
+    if features.get(
+        "suspicious_tld",
+        0,
+    ) == 1:
+
+        score += 15
+
+        reasons.append(
+            "Domain uses a suspicious top-level domain (TLD)"
+        )
+
+    # --------------------------------
     # Threat Intelligence
     # --------------------------------
 

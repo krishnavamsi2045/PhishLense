@@ -8,10 +8,11 @@ logs/*
 data/raw/*
 data/processed/*
 .pytest_cache/
+.coverage
 .vscode/
 *.zip
 node_modules/
 dist/
 build/
 .DS_Store
-
+*.code-workspace

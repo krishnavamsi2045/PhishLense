@@ -1,0 +1,31 @@
+{
+  "total_records": 65718,
+  "raw_records_processed": 66073,
+  "phishing_records": 38268,
+  "legitimate_records": 27450,
+  "duplicates_removed": 355,
+  "invalid_records_removed": 0,
+  "conflicting_records": 0,
+  "phishing_percentage": 58.23,
+  "legitimate_percentage": 41.77,
+  "generated_at": "2026-08-28T08:44:11.582131+00:00",
+  "source_distribution": {
+    "Academic_Benign_Corpus": 20768,
+    "URLhaus_Recent": 15797,
+    "PhishTank_Pattern_Feed": 14625,
+    "OpenPhish_IP_Corpus": 6930,
+    "Tranco_Curated_Corpus": 6162,
+    "phishlense_seed_v1": 1064,
+    "OpenPhish_Live_Feed": 300,
+    "Homograph_Academic_Corpus": 72
+  },
+  "category_distribution": {
+    "legitimate_web": 27431,
+    "malware_distribution": 15797,
+    "scam_infrastructure": 11944,
+    "credential_harvesting": 10260,
+    "brand_impersonation": 141,
+    "ip_phishing": 126,
+    "legitimate_enterprise": 19
+  }
+}

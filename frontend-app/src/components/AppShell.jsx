@@ -8,6 +8,7 @@ import BootSequence from "./BootSequence";
 import Terminal from "./Terminal";
 import Environment from "../scenes/Environment";
 import CyberBackground from "./CyberBackground";
+import ScrollSequenceBackground from "./ScrollSequenceBackground";
 
 import DashboardView from "../Pages/DashboardView";
 import ScanView from "../pages/ScanView";
@@ -117,11 +118,8 @@ export default function AppShell() {
         {!bootDone && <BootSequence onComplete={() => setBootDone(true)} />}
       </AnimatePresence>
 
-      {/* Black and Red Plain Theme Background */}
-      <CyberBackground />
-
-      {/* Persistent Layered 3D Environment Canvas (0 Remounts Across All Views) */}
-      <Environment recentScans={recentScans} />
+      {/* Clean High-Clarity Butter Smooth Scrolling Animation Background */}
+      <ScrollSequenceBackground overlayOpacity={0.35} opacity={1.0} />
 
       {/* Main Persistent Dashboard Shell */}
       <div className={`app-layout ${collapsedSidebar ? "sidebar-collapsed" : ""}`}>
