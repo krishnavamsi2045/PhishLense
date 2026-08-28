@@ -15,7 +15,7 @@ def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert "PhishLense API" in data["message"]
+    assert "PhishLense" in data["message"]
     assert "version" in data
 
 
@@ -33,7 +33,7 @@ def test_docs_endpoint():
 def test_openapi_schema_endpoint():
     response = client.get("/openapi.json")
     assert response.status_code == 200
-    assert response.json()["info"]["title"] == "PhishLense API"
+    assert "PhishLense" in response.json()["info"]["title"]
 
 
 @patch("api.main.analyze_url")

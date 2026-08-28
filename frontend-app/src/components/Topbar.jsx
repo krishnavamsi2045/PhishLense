@@ -9,6 +9,10 @@ import {
   FiCheckCircle,
   FiAlertTriangle,
   FiMenu,
+  FiLogOut,
+  FiUser,
+  FiCpu,
+  FiZap,
 } from "react-icons/fi";
 
 export default function Topbar({
@@ -21,9 +25,13 @@ export default function Topbar({
   onClearNotifications,
   mobileMenuOpen,
   setMobileMenuOpen,
+  user,
+  onLogout,
+  onOpenAuth,
 }) {
   const [currentTime, setCurrentTime] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -36,13 +44,14 @@ export default function Topbar({
     return () => clearInterval(interval);
   }, []);
 
+  const isAdmin = user?.role === "ADMIN";
   const totalThreats = (stats?.phishing || 0) + (stats?.suspicious || 0);
   const threatLevel =
     stats?.phishing > 0 ? "ELEVATED" : totalThreats > 0 ? "MONITORING" : "SECURE";
 
   return (
     <header className="topbar-shell">
-      {/* Left Area: Mobile Menu Toggle & Breadcrumbs */}
+      {/* Left Area: Mobile Menu Toggle & Search Bar */}
       <div className="topbar-left">
         <button
           className="mobile-nav-toggle"
@@ -58,77 +67,65 @@ export default function Topbar({
             Search threats, domains, IPs...
           </span>
           <kbd className="cmd-badge">
-            <span>Ctrl</span> <span>K</span>
+            <span>Ctrl</span>K
           </kbd>
+        </div>
+
+        {/* Threat Level Badge */}
+        <div className={`defense-status-pill ${threatLevel.toLowerCase()}`}>
+          <span className="pulse-dot" />
+          <span className="status-label">DEFENSE LEVEL: {threatLevel}</span>
         </div>
       </div>
 
-      {/* Right Area: System Status, Live UTC, Quick Scan, Notifications, Profile */}
+      {/* Right Area: Time, Fast Scan, Notifications, Profile */}
       <div className="topbar-right">
-        {/* Threat State Pill */}
-        <div className={`threat-status-pill ${threatLevel.toLowerCase()}`}>
-          <span className="pulse-indicator" />
-          <span className="threat-status-text">
-            {threatLevel === "ELEVATED"
-              ? "DEFENSE LEVEL: ELEVATED"
-              : threatLevel === "MONITORING"
-              ? "DEFENSE LEVEL: GUARDED"
-              : "DEFENSE LEVEL: SECURE"}
-          </span>
-        </div>
-
-        {/* Live UTC Clock */}
-        <div className="utc-clock">
+        {/* UTC Clock */}
+        <div className="utc-clock-badge">
           <FiActivity className="clock-icon" />
-          <span>{currentTime || "00:00:00 UTC"}</span>
+          <span>{currentTime || "12:00:00 UTC"}</span>
         </div>
 
-        {/* Quick Scan Action */}
+        {/* Scan URL Primary Action */}
         <button
-          className="quick-scan-btn"
+          className="topbar-scan-btn glow-button"
           onClick={() => setActiveView("scan")}
-          title="Open AI URL Scanner"
         >
           <FiShield className="btn-icon" />
           <span>Scan URL</span>
         </button>
 
-        {/* Terminal Button */}
+        {/* Interactive Terminal Quick Launch */}
         <button
-          className="quick-scan-btn"
-          style={{ background: "rgba(0, 229, 255, 0.12)", borderColor: "var(--phish-cyan)" }}
+          className="topbar-terminal-btn"
           onClick={onOpenTerminal}
-          title="Open SOC Cyber Terminal"
+          title="Open Threat Terminal (`)"
         >
-          <FiTerminal className="btn-icon" />
+          <FiTerminal />
           <span>Terminal</span>
         </button>
 
-        {/* Notifications */}
+        {/* Notifications Dropdown */}
         <div className="notif-wrapper">
           <button
             className="notif-bell-btn"
             onClick={() => setNotifOpen(!notifOpen)}
-            aria-label="View notifications"
-            title="System notifications"
+            title="Investigation Alerts"
           >
             <FiBell />
             {notifications.length > 0 && (
-              <span className="notif-counter">{notifications.length}</span>
+              <span className="notif-count-badge">{notifications.length}</span>
             )}
           </button>
 
           {notifOpen && (
-            <div className="notif-dropdown">
+            <div className="notif-dropdown-card glass-panel">
               <div className="notif-header">
-                <span>SOC Notifications ({notifications.length})</span>
+                <span className="notif-title">SOC Incident Alerts</span>
                 {notifications.length > 0 && (
                   <button
                     className="notif-clear-btn"
-                    onClick={() => {
-                      onClearNotifications();
-                      setNotifOpen(false);
-                    }}
+                    onClick={onClearNotifications}
                   >
                     Clear All
                   </button>
@@ -137,22 +134,17 @@ export default function Topbar({
               <div className="notif-list">
                 {notifications.length === 0 ? (
                   <div className="notif-empty">
-                    <FiCheckCircle style={{ fontSize: 24, color: "var(--phish-cyan)", marginBottom: 8 }} />
-                    <p>All threat telemetry normal. No pending alerts.</p>
+                    <FiCheckCircle className="empty-icon" />
+                    <span>Zero unacknowledged security alerts</span>
                   </div>
                 ) : (
-                  notifications.map((n, idx) => (
-                    <div key={idx} className={`notif-card ${n.type || "info"}`}>
-                      <div className="notif-title">
-                        {n.type === "threat" ? (
-                          <FiAlertTriangle style={{ color: "var(--phish-red)" }} />
-                        ) : (
-                          <FiTerminal style={{ color: "var(--phish-cyan)" }} />
-                        )}
-                        <span>{n.title}</span>
+                  notifications.map((n) => (
+                    <div key={n.id} className={`notif-item ${n.type || "info"}`}>
+                      <div className="notif-item-header">
+                        <span className="item-title">{n.title}</span>
+                        <span className="item-time">{n.time}</span>
                       </div>
-                      <p className="notif-desc">{n.message}</p>
-                      <span className="notif-time">{n.time || "Just now"}</span>
+                      <p className="item-msg">{n.message}</p>
                     </div>
                   ))
                 )}
@@ -161,13 +153,91 @@ export default function Topbar({
           )}
         </div>
 
-        {/* Analyst Profile */}
-        <div className="analyst-badge" title="Security Operations Center — Analyst L3">
-          <div className="analyst-avatar">SOC</div>
-          <div className="analyst-info">
-            <span className="analyst-role">Analyst L3</span>
-            <span className="analyst-id">SEC-9082</span>
-          </div>
+        {/* User Identity Profile Pill / Dropdown */}
+        <div className="user-profile-menu-wrap">
+          {user ? (
+            <button
+              className={`user-identity-pill ${isAdmin ? "admin" : "analyst"}`}
+              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+            >
+              <div className="avatar-chip">
+                {user.full_name ? user.full_name.charAt(0).toUpperCase() : "U"}
+              </div>
+              <div className="identity-text">
+                <strong className="user-title">{user.full_name}</strong>
+                <span className="user-clearance">
+                  {isAdmin ? "COMMANDER (ADMIN)" : "ANALYST (USER)"}
+                </span>
+              </div>
+            </button>
+          ) : (
+            <button className="topbar-login-btn" onClick={onOpenAuth}>
+              <FiUser />
+              <span>Authenticate</span>
+            </button>
+          )}
+
+          {profileDropdownOpen && user && (
+            <div className="profile-dropdown glass-panel">
+              <div className="profile-drop-header">
+                <strong>{user.full_name}</strong>
+                <span>{user.email}</span>
+                <span className={`role-tag ${isAdmin ? "admin" : "analyst"}`}>
+                  {user.role} Clearances
+                </span>
+              </div>
+
+              <div className="profile-drop-actions">
+                {isAdmin && (
+                  <button
+                    className="drop-act-item"
+                    onClick={() => {
+                      setActiveView("admin-overview");
+                      setProfileDropdownOpen(false);
+                    }}
+                  >
+                    <FiShield />
+                    <span>Admin Command Center</span>
+                  </button>
+                )}
+
+                <button
+                  className="drop-act-item"
+                  onClick={() => {
+                    setActiveView("dashboard");
+                    setProfileDropdownOpen(false);
+                  }}
+                >
+                  <FiActivity />
+                  <span>SOC Analyst Workspace</span>
+                </button>
+
+                <button
+                  className="drop-act-item"
+                  onClick={() => {
+                    setActiveView("settings");
+                    setProfileDropdownOpen(false);
+                  }}
+                >
+                  <FiUser />
+                  <span>Profile & Security</span>
+                </button>
+
+                <div className="divider" />
+
+                <button
+                  className="drop-act-item logout"
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    onLogout();
+                  }}
+                >
+                  <FiLogOut />
+                  <span>End Session (Logout)</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
