@@ -11,14 +11,14 @@ import CyberBackground from "./CyberBackground";
 import ScrollSequenceBackground from "./ScrollSequenceBackground";
 
 import DashboardView from "../Pages/DashboardView";
-import ScanView from "../pages/ScanView";
-import ThreatIntelView from "../pages/ThreatIntelView";
-import LiveFeedView from "../pages/LiveFeedView";
-import ReportsView from "../pages/ReportsView";
-import DomainAnalysisView from "../pages/DomainAnalysisView";
-import SettingsView from "../pages/SettingsView";
-import ApiKeysView from "../pages/ApiKeysView";
-import DocumentationView from "../pages/DocumentationView";
+import ScanView from "../Pages/ScanView";
+import ThreatIntelView from "../Pages/ThreatIntelView";
+import LiveFeedView from "../Pages/LiveFeedView";
+import ReportsView from "../Pages/ReportsView";
+import DomainAnalysisView from "../Pages/DomainAnalysisView";
+import SettingsView from "../Pages/SettingsView";
+import ApiKeysView from "../Pages/ApiKeysView";
+import DocumentationView from "../Pages/DocumentationView";
 
 import { useDashboard } from "../hooks/useDashboard";
 import { useHistory } from "../hooks/useHistory";
