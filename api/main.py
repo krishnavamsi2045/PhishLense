@@ -242,6 +242,42 @@ def login(req: LoginRequest, request: Request, db=Depends(get_db)):
     }
 
 
+@app.post("/auth/admin/login")
+def admin_login(req: LoginRequest, request: Request, db=Depends(get_db)):
+    email_clean = req.email.lower().strip()
+    user = db.query(User).filter(User.email == email_clean).first()
+
+    if not user or not verify_password(req.password, user.password_hash):
+        log_audit(db, "ADMIN_LOGIN_FAILED", email_clean, None, request, "FAILED", "Invalid admin credentials")
+        raise HTTPException(status_code=401, detail="Invalid administrator credentials.")
+
+    if user.role.upper() != "ADMIN":
+        log_audit(db, "ADMIN_ACCESS_DENIED", email_clean, user, request, "BLOCKED", "User lacks ADMIN privileges")
+        raise HTTPException(status_code=403, detail="Access denied. Administrator clearance required.")
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Administrator account is deactivated.")
+
+    user.last_login = datetime.now(timezone.utc)
+    db.commit()
+
+    token = create_access_token({"sub": str(user.id), "email": user.email, "role": "ADMIN"})
+    log_audit(db, "ADMIN_LOGIN_SUCCESS", f"admin:{user.id}", user, request, "SUCCESS", "Admin session established")
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "role": "ADMIN",
+            "organization": user.organization,
+            "last_login": user.last_login.strftime("%Y-%m-%d %H:%M:%S UTC") if user.last_login else None
+        }
+    }
+
+
 @app.get("/auth/me")
 def get_me(user: User = Depends(require_auth_user)):
     return {
@@ -445,8 +481,14 @@ def history(
     if verdict:
         query = query.filter(Scan.verdict == verdict.upper())
 
-    # Standard users only see their own scans if user_id is assigned, or global if not filtered
-    scans = query.order_by(Scan.id.desc()).limit(limit).all()
+    # User data isolation: Normal users only see their own scans
+    if user and user.role == "USER":
+        user_scans = query.filter(Scan.user_id == user.id).order_by(Scan.id.desc()).limit(limit).all()
+        # If new user has not scanned yet, return empty list or personal history
+        scans = user_scans
+    else:
+        # Admins or unauthenticated overview see all scans
+        scans = query.order_by(Scan.id.desc()).limit(limit).all()
 
     return [
         {
@@ -469,9 +511,13 @@ def history(
 
 @app.delete("/history")
 def clear_history(request: Request, user: Optional[User] = Depends(get_current_user_optional), db=Depends(get_db)):
-    deleted = db.query(Scan).delete()
+    if user and user.role == "USER":
+        deleted = db.query(Scan).filter(Scan.user_id == user.id).delete()
+    else:
+        deleted = db.query(Scan).delete()
+
     db.commit()
-    log_audit(db, "CLEAR_HISTORY", "all_scans", user, request, "SUCCESS", f"Purged {deleted} scan records")
+    log_audit(db, "CLEAR_HISTORY", "user_scans", user, request, "SUCCESS", f"Purged {deleted} scan records")
     return {"message": "History cleared successfully", "deleted_records": deleted}
 
 
@@ -693,7 +739,7 @@ def admin_retrain(admin: User = Depends(require_admin), db=Depends(get_db), requ
 def get_scan(scan_id: int, db=Depends(get_db)):
     scan = db.query(Scan).filter(Scan.id == scan_id).first()
     if not scan:
-        return {"error": "Scan not found"}
+        raise HTTPException(status_code=404, detail="Scan not found")
     return {
         "id": scan.id,
         "url": scan.url,

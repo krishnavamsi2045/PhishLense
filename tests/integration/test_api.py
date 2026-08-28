@@ -89,8 +89,7 @@ def test_analytics_endpoint_structure():
 
 def test_get_scan_not_found():
     response = client.get("/scan/999999999")
-    assert response.status_code == 200
-    assert "error" in response.json()
+    assert response.status_code == 404
 
 
 @patch("api.main.analyze_url")

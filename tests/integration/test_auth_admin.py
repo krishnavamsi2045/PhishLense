@@ -34,6 +34,24 @@ def test_auth_login_analyst():
     assert data["user"]["role"] == "USER"
 
 
+def test_auth_admin_login():
+    response = client.post("/auth/admin/login", json={
+        "email": "admin@phishlense.io",
+        "password": "Admin@12345"
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["user"]["role"] == "ADMIN"
+
+
+def test_user_forbidden_on_admin_login():
+    response = client.post("/auth/admin/login", json={
+        "email": "analyst@phishlense.io",
+        "password": "Analyst@12345"
+    })
+    assert response.status_code == 403
+
+
 def test_auth_login_invalid_password():
     response = client.post("/auth/login", json={
         "email": "admin@phishlense.io",

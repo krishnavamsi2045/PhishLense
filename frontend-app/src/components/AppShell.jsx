@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import CommandPalette from "./CommandPalette";
 import ScanModal from "./ScanModal";
 import BootSequence from "./BootSequence";
 import Terminal from "./Terminal";
-import CyberBackground from "./CyberBackground";
 import ScrollSequenceBackground from "./ScrollSequenceBackground";
 
 // User Views
@@ -20,7 +20,6 @@ import DomainAnalysisView from "../Pages/DomainAnalysisView";
 import SettingsView from "../Pages/SettingsView";
 import ApiKeysView from "../Pages/ApiKeysView";
 import DocumentationView from "../Pages/DocumentationView";
-import AuthView from "../Pages/AuthView";
 
 // Admin Views
 import AdminOverview from "../Pages/Admin/AdminOverview";
@@ -35,29 +34,14 @@ import SystemHealthView from "../Pages/Admin/SystemHealthView";
 import { useDashboard } from "../hooks/useDashboard";
 import { useHistory } from "../hooks/useHistory";
 import { useSceneDirector } from "../scenes/scene-director/useSceneDirector";
-import { logoutApi, getMeApi } from "../services/api";
 
-export default function AppShell() {
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("phishlense_user");
-      return stored
-        ? JSON.parse(stored)
-        : {
-            id: 1,
-            full_name: "SOC Commander Admin",
-            email: "admin@phishlense.io",
-            role: "ADMIN",
-            organization: "PhishLense Cyber Defense Core",
-          };
-    } catch {
-      return null;
-    }
-  });
-
-  const [activeView, setActiveView] = useState("dashboard");
-  const [bootDone, setBootDone] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+export default function AppShell({ user, defaultPortal = "user", onLogout }) {
+  const navigate = useNavigate();
+  const isAdminPortal = defaultPortal === "admin" && user?.role === "ADMIN";
+  const [activeView, setActiveView] = useState(() =>
+    isAdminPortal ? "admin-overview" : "dashboard"
+  );
+  const [bootDone, setBootDone] = useState(true);
   const [selectedScan, setSelectedScan] = useState(null);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);
@@ -74,7 +58,7 @@ export default function AppShell() {
       id: 1,
       type: "info",
       title: "Sentinel Defense Core Armed",
-      message: "Python heuristic engine and VirusTotal telemetry online.",
+      message: "Python heuristic engine and Threat Intelligence telemetry online.",
       time: "Startup",
     },
   ]);
@@ -107,14 +91,13 @@ export default function AppShell() {
     const riskScore = scanResult?.risk_score || 0;
     const isThreat = verdict.includes("PHISH") || verdict.includes("MALICIOUS");
 
-    // Update 3D Sentinel Core state
     setLastVerdict(verdict, riskScore);
 
     setNotifications((prev) => [
       {
         id: Date.now(),
         type: isThreat ? "threat" : "info",
-        title: isThreat ? `Threat Flagged: ${verdict}` : `URL Verified: ${verdict}`,
+        title: isThreat ? `Threat Intercepted: ${verdict}` : `URL Verified: ${verdict}`,
         message: `Target ${scanResult.url} evaluated with risk score ${riskScore}/100.`,
         time: "Just now",
       },
@@ -129,44 +112,29 @@ export default function AppShell() {
       {
         id: Date.now(),
         type: "info",
-        title: "Scan Database Cleared",
-        message: "All historical scan records purged from SQLite.",
+        title: "Scan History Cleared",
+        message: "Historical scan records purged from database.",
         time: "Just now",
       },
       ...prev,
     ]);
   };
 
-  const handleLogout = async () => {
-    await logoutApi();
-    setUser(null);
-    setActiveView("dashboard");
-    setAuthModalOpen(true);
-  };
-
-  const handleAuthSuccess = (authenticatedUser) => {
-    setUser(authenticatedUser);
-    setAuthModalOpen(false);
-    if (authenticatedUser.role === "ADMIN") {
-      setActiveView("admin-overview");
-    } else {
-      setActiveView("dashboard");
+  const handleUserLogout = () => {
+    if (onLogout) {
+      onLogout();
     }
+    navigate(user?.role === "ADMIN" ? "/admin/login" : "/login");
   };
 
   return (
     <div className="spa-app-root">
-      {/* Initial Boot Sequence (Skippable) */}
-      <AnimatePresence>
-        {!bootDone && <BootSequence onComplete={() => setBootDone(true)} />}
-      </AnimatePresence>
-
       {/* High-Clarity Scrolling Animation Background */}
-      <ScrollSequenceBackground overlayOpacity={0.35} opacity={1.0} />
+      <ScrollSequenceBackground overlayOpacity={0.4} opacity={1.0} />
 
       {/* Main Persistent Dashboard Shell */}
       <div className={`app-layout ${collapsedSidebar ? "sidebar-collapsed" : ""}`}>
-        {/* Persistent Floating Glass Sidebar */}
+        {/* Floating Glass Sidebar */}
         <Sidebar
           activeView={activeView}
           setActiveView={(view) => {
@@ -177,7 +145,7 @@ export default function AppShell() {
           collapsed={collapsedSidebar}
           setCollapsed={setCollapsedSidebar}
           user={user}
-          onLogout={handleLogout}
+          onLogout={handleUserLogout}
         />
 
         {/* Mobile Navigation Drawer */}
@@ -200,7 +168,7 @@ export default function AppShell() {
                 collapsed={false}
                 setCollapsed={() => setMobileMenuOpen(false)}
                 user={user}
-                onLogout={handleLogout}
+                onLogout={handleUserLogout}
               />
             </div>
           </div>
@@ -208,7 +176,7 @@ export default function AppShell() {
 
         {/* Main Content Workspace */}
         <div className="main-content-column">
-          {/* Persistent Topbar */}
+          {/* Topbar */}
           <Topbar
             activeView={activeView}
             setActiveView={setActiveView}
@@ -220,14 +188,13 @@ export default function AppShell() {
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
             user={user}
-            onLogout={handleLogout}
-            onOpenAuth={() => setAuthModalOpen(true)}
+            onLogout={handleUserLogout}
           />
 
-          {/* Dynamic Central Content Area (Zero-Reload) */}
+          {/* Dynamic Central Content Viewport */}
           <main className="central-viewport-area">
             <AnimatePresence mode="wait">
-              {/* User Views */}
+              {/* User SOC Views */}
               {activeView === "dashboard" && (
                 <DashboardView
                   key="dashboard"
@@ -299,7 +266,7 @@ export default function AppShell() {
                 <DocumentationView key="documentation" />
               )}
 
-              {/* Admin Portal Views */}
+              {/* Admin Command Center Views */}
               {activeView === "admin-overview" && (
                 <AdminOverview key="admin-overview" />
               )}
@@ -339,17 +306,7 @@ export default function AppShell() {
         </div>
       </div>
 
-      {/* Authentication Modal / Portal */}
-      <AnimatePresence>
-        {authModalOpen && (
-          <AuthView
-            onAuthSuccess={handleAuthSuccess}
-            onClose={() => setAuthModalOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Global Command Palette Modal (Ctrl+K / Cmd+K) */}
+      {/* Global Command Palette Modal (Ctrl+K) */}
       <CommandPalette
         isOpen={cmdOpen}
         onClose={() => setCmdOpen(false)}
@@ -370,7 +327,7 @@ export default function AppShell() {
         }}
       />
 
-      {/* Deep Inspection Scan Dossier Modal */}
+      {/* Scan Report Dossier Modal */}
       <ScanModal
         scan={selectedScan}
         onClose={() => setSelectedScan(null)}

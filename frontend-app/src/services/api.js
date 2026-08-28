@@ -46,6 +46,11 @@ export const loginApi = async (email, password) => {
   return res.data;
 };
 
+export const adminLoginApi = async (email, password) => {
+  const res = await apiClient.post("/auth/admin/login", { email, password });
+  return res.data;
+};
+
 export const registerApi = async (fullName, email, password, organization = "Enterprise SOC") => {
   const res = await apiClient.post("/auth/register", {
     full_name: fullName,
