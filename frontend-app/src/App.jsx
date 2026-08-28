@@ -42,9 +42,6 @@ function RootRedirect({ user }) {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  if (user.role === "ADMIN") {
-    return <Navigate to="/admin" replace />;
-  }
   return <Navigate to="/app" replace />;
 }
 
@@ -80,7 +77,7 @@ export default function App() {
           path="/login"
           element={
             user ? (
-              <Navigate to={user.role === "ADMIN" ? "/admin" : "/app"} replace />
+              <Navigate to="/app" replace />
             ) : (
               <LoginView onLoginSuccess={handleLoginSuccess} />
             )
@@ -90,17 +87,18 @@ export default function App() {
           path="/register"
           element={
             user ? (
-              <Navigate to={user.role === "ADMIN" ? "/admin" : "/app"} replace />
+              <Navigate to="/app" replace />
             ) : (
               <RegisterView />
             )
           }
         />
 
-        {/* Fallback for legacy admin login URL */}
+        {/* Fallbacks */}
+        <Route path="/admin/*" element={<Navigate to="/app" replace />} />
         <Route path="/admin/login" element={<Navigate to="/login" replace />} />
 
-        {/* User SOC Workspace */}
+        {/* Unified Cyber Workspace */}
         <Route
           path="/app/*"
           element={
@@ -111,20 +109,6 @@ export default function App() {
                 onLogout={handleLogout}
               />
             </ProtectedUserRoute>
-          }
-        />
-
-        {/* Admin Command Center */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedAdminRoute user={user}>
-              <AppShell
-                user={user}
-                defaultPortal="admin"
-                onLogout={handleLogout}
-              />
-            </ProtectedAdminRoute>
           }
         />
 

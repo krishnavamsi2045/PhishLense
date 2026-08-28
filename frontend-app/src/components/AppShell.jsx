@@ -37,10 +37,7 @@ import { useSceneDirector } from "../scenes/scene-director/useSceneDirector";
 
 export default function AppShell({ user, defaultPortal = "user", onLogout }) {
   const navigate = useNavigate();
-  const isAdminPortal = defaultPortal === "admin" && user?.role === "ADMIN";
-  const [activeView, setActiveView] = useState(() =>
-    isAdminPortal ? "admin-overview" : "dashboard"
-  );
+  const [activeView, setActiveView] = useState("dashboard");
   const [bootDone, setBootDone] = useState(true);
   const [selectedScan, setSelectedScan] = useState(null);
   const [cmdOpen, setCmdOpen] = useState(false);

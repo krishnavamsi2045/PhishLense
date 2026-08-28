@@ -38,11 +38,7 @@ export default function LoginView({ onLoginSuccess }) {
         onLoginSuccess(data.user);
       }
 
-      if (data.user.role === "ADMIN") {
-        navigate("/admin");
-      } else {
-        navigate("/app");
-      }
+      navigate("/app");
     } catch (err) {
       setError(
         err.response?.data?.detail ||

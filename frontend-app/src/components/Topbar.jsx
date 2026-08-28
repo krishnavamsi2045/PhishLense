@@ -188,30 +188,6 @@ export default function Topbar({
               </div>
 
               <div className="profile-drop-actions">
-                {isAdmin && (
-                  <button
-                    className="drop-act-item"
-                    onClick={() => {
-                      setActiveView("admin-overview");
-                      setProfileDropdownOpen(false);
-                    }}
-                  >
-                    <FiShield />
-                    <span>Admin Command Center</span>
-                  </button>
-                )}
-
-                <button
-                  className="drop-act-item"
-                  onClick={() => {
-                    setActiveView("dashboard");
-                    setProfileDropdownOpen(false);
-                  }}
-                >
-                  <FiActivity />
-                  <span>SOC Analyst Workspace</span>
-                </button>
-
                 <button
                   className="drop-act-item"
                   onClick={() => {
@@ -220,13 +196,10 @@ export default function Topbar({
                   }}
                 >
                   <FiUser />
-                  <span>Profile & Security</span>
+                  <span>Profile & Settings</span>
                 </button>
-
-                <div className="divider" />
-
                 <button
-                  className="drop-act-item logout"
+                  className="drop-act-item danger"
                   onClick={() => {
                     setProfileDropdownOpen(false);
                     onLogout();
