@@ -7,14 +7,13 @@ import {
   FiMail,
   FiArrowRight,
   FiAlertTriangle,
-  FiCheckCircle,
 } from "react-icons/fi";
 import { loginApi } from "../services/api";
 
 export default function LoginView({ onLoginSuccess }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("Phishlense@analyst.com");
+  const [password, setPassword] = useState("Phish@Lense");
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,7 +46,7 @@ export default function LoginView({ onLoginSuccess }) {
     } catch (err) {
       setError(
         err.response?.data?.detail ||
-          "Authentication failed. Please verify your email and password."
+          "Authentication failed. Please check your credentials."
       );
     } finally {
       setLoading(false);
@@ -58,9 +57,9 @@ export default function LoginView({ onLoginSuccess }) {
     <div className="auth-fullscreen-container">
       <motion.div
         className="auth-clean-card glass-panel"
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
       >
         {/* Brand Header */}
         <div className="auth-card-header">
@@ -68,7 +67,7 @@ export default function LoginView({ onLoginSuccess }) {
             <FiShield />
           </div>
           <h1 className="auth-main-title">PhishLense</h1>
-          <p className="auth-sub-title">AI Cyber Threat Intelligence & SOC Portal</p>
+          <p className="auth-sub-title">AI Cybersecurity & Phishing Threat Intelligence</p>
         </div>
 
         {error && (
@@ -82,17 +81,17 @@ export default function LoginView({ onLoginSuccess }) {
           </motion.div>
         )}
 
-        {/* User Login Form */}
+        {/* Unified Login Form */}
         <form onSubmit={handleSubmit} className="auth-form-clean">
           <div className="auth-field-group">
-            <label>Work Email</label>
+            <label>Account Email</label>
             <div className="auth-input-box">
               <FiMail className="field-icon" />
               <input
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="analyst@phishlense.io"
+                placeholder="Phishlense@analyst.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -102,7 +101,10 @@ export default function LoginView({ onLoginSuccess }) {
           <div className="auth-field-group">
             <div className="field-label-row">
               <label>Password</label>
-              <span className="forgot-pass-link" onClick={() => alert("Contact your SOC administrator to reset credentials.")}>
+              <span
+                className="forgot-pass-link"
+                onClick={() => alert("Please use the default credentials or contact your administrator.")}
+              >
                 Forgot?
               </span>
             </div>
@@ -136,30 +138,24 @@ export default function LoginView({ onLoginSuccess }) {
             className="auth-btn-primary glow-button"
           >
             {loading ? (
-              <span>Authenticating Gateway...</span>
+              <span>Authenticating...</span>
             ) : (
               <>
-                <span>Sign In to SOC Portal</span>
+                <span>Sign In to Dashboard</span>
                 <FiArrowRight />
               </>
             )}
           </button>
         </form>
 
-        {/* Navigation Links */}
+        {/* Footer Navigation */}
         <div className="auth-card-footer">
           <p className="register-prompt">
             Don't have an account?{" "}
             <Link to="/register" className="auth-action-link">
-              Create account
+              Create Account
             </Link>
           </p>
-
-          <div className="admin-gateway-link-wrap">
-            <Link to="/admin/login" className="admin-portal-link">
-              <FiShield /> Administrator Command Login →
-            </Link>
-          </div>
         </div>
       </motion.div>
     </div>

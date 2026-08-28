@@ -30,7 +30,7 @@ function ProtectedUserRoute({ user, children }) {
 
 function ProtectedAdminRoute({ user, children }) {
   if (!user) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
   if (user.role !== "ADMIN") {
     return <Navigate to="/app" replace />;
@@ -72,10 +72,10 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Root Redirect based on Auth State */}
+        {/* Root Redirect to Login or Dashboard */}
         <Route path="/" element={<RootRedirect user={user} />} />
 
-        {/* User Authentication Entry Points */}
+        {/* Single Unified Login & Registration */}
         <Route
           path="/login"
           element={
@@ -97,17 +97,8 @@ export default function App() {
           }
         />
 
-        {/* Admin Authentication Entry Point (Zero Public Register) */}
-        <Route
-          path="/admin/login"
-          element={
-            user && user.role === "ADMIN" ? (
-              <Navigate to="/admin" replace />
-            ) : (
-              <AdminLoginView onLoginSuccess={handleLoginSuccess} />
-            )
-          }
-        />
+        {/* Fallback for legacy admin login URL */}
+        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
 
         {/* User SOC Workspace */}
         <Route

@@ -10,6 +10,13 @@ from backend.auth.security import hash_password
 
 INITIAL_USERS = [
     {
+        "email": "Phishlense@analyst.com",
+        "full_name": "PhishLense Lead Analyst",
+        "password": "Phish@Lense",
+        "role": "ADMIN",
+        "organization": "PhishLense Cyber Defense Core",
+    },
+    {
         "email": "admin@phishlense.io",
         "full_name": "SOC Commander Admin",
         "password": "Admin@12345",
@@ -219,13 +226,13 @@ def auto_seed_scans_if_needed(db_session, force=False):
     """Automatically seeds initial enterprise users, audit logs, and 160+ multi-category scans."""
     try:
         # 1. Seed Users if not present
-        user_count = db_session.query(User).count()
         created_users = []
-        if user_count == 0:
-            print("[INFO] Seeding initial enterprise users (Admin & Analysts)...", flush=True)
-            for u in INITIAL_USERS:
+        for u in INITIAL_USERS:
+            clean_email = u["email"].lower().strip()
+            existing = db_session.query(User).filter(User.email.ilike(clean_email)).first()
+            if not existing:
                 new_user = User(
-                    email=u["email"],
+                    email=clean_email,
                     full_name=u["full_name"],
                     password_hash=hash_password(u["password"]),
                     role=u["role"],
@@ -235,9 +242,13 @@ def auto_seed_scans_if_needed(db_session, force=False):
                 )
                 db_session.add(new_user)
                 created_users.append(new_user)
-            db_session.commit()
-        else:
-            created_users = db_session.query(User).all()
+            else:
+                existing.email = clean_email
+                existing.password_hash = hash_password(u["password"])
+                existing.role = u["role"]
+                existing.is_active = True
+                created_users.append(existing)
+        db_session.commit()
 
         admin_user = db_session.query(User).filter(User.role == "ADMIN").first()
         analyst_user = db_session.query(User).filter(User.role == "USER").first() or admin_user
