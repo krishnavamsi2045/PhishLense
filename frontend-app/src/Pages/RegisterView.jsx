@@ -61,6 +61,7 @@ export default function RegisterView() {
     } catch (err) {
       setError(
         err.response?.data?.detail ||
+          err.message ||
           "Registration failed. An account with this email may already exist."
       );
     } finally {

@@ -46,6 +46,7 @@ export default function LoginView({ onLoginSuccess }) {
     } catch (err) {
       setError(
         err.response?.data?.detail ||
+          err.message ||
           "Authentication failed. Please check your credentials."
       );
     } finally {
